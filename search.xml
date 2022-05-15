@@ -60,6 +60,221 @@
       </tags>
   </entry>
   <entry>
+    <title>SpringBoot及Java8特性</title>
+    <url>/2021/07/15/Spring%20Boot%E5%8F%8AJava8%E7%89%B9%E6%80%A7/</url>
+    <content><![CDATA[<h2 id="BigDecimal四舍五入"><a href="#BigDecimal四舍五入" class="headerlink" title="BigDecimal四舍五入"></a>BigDecimal四舍五入</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">divide(<span class="keyword">new</span> <span class="title class_">BigDecimal</span>(<span class="number">1</span>),<span class="number">1</span>,BigDecimal.ROUND_HALF_UP)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (String key : results.keySet())&#123;</span><br><span class="line">          <span class="type">ProcurementCountBudgetStatistic</span> <span class="variable">procurementCountBudgetStatistic</span> <span class="operator">=</span> results.get(key);</span><br><span class="line">          <span class="type">BigDecimal</span> <span class="variable">divide</span> <span class="operator">=</span> procurementCountBudgetStatistic.getBudget().divide(<span class="keyword">new</span> <span class="title class_">BigDecimal</span>(<span class="number">10000</span>), <span class="number">1</span>, BigDecimal.ROUND_HALF_UP);</span><br><span class="line">          procurementCountBudgetStatistic.setBudget(divide);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (ProjectByTypes projectByTypes : serve1) &#123;</span><br><span class="line">    <span class="type">BigDecimal</span> <span class="variable">Budget</span> <span class="operator">=</span> projectByTypes.getAmount();</span><br><span class="line">    Budget.divide(<span class="keyword">new</span> <span class="title class_">BigDecimal</span>(<span class="number">10000</span>),<span class="number">1</span>, BigDecimal.ROUND_HALF_UP);</span><br><span class="line">    projectByTypes.setAmount(Budget.divide(<span class="keyword">new</span> <span class="title class_">BigDecimal</span>(<span class="number">10000</span>),<span class="number">1</span>, BigDecimal.ROUND_HALF_UP));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Stream流"><a href="#Stream流" class="headerlink" title="Stream流"></a>Stream流</h2><h3 id="将list-转为-Map"><a href="#将list-转为-Map" class="headerlink" title="将list 转为 Map"></a>将list 转为 Map</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Map&lt;Integer,String&gt; userMap1 = userList.stream().collect(Collectors.toMap(User::getId,User::getName))</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/20190627164129336.png" alt="20190627164129336"></p>
+<h3 id="Map装载-排序"><a href="#Map装载-排序" class="headerlink" title="Map装载+排序"></a>Map装载+排序</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">SectionCheckAndCheckItemVo</span> <span class="variable">sectionCheck</span> <span class="operator">=</span> sectionCheckDao.getById(sessionCheckId, MapFunctions.plainPojoMapper(SectionCheckAndCheckItemVo.class));</span><br><span class="line">List&lt;SectionCheckOptionResultListVo&gt; resultPojos = sectionCheckOptionResultDao.findPojoBySectionCheckId(sessionCheckId, MapFunctions.plainPojoMapper(SectionCheckOptionResultListVo.class));</span><br><span class="line">List&lt;SectionCheckSubOptionResultVo&gt; subResultPojos = sectionCheckSubOptionResultDao.findPojoBySectionCheckId(sessionCheckId, MapFunctions.plainPojoMapper(SectionCheckSubOptionResultVo.class));</span><br><span class="line">HashMap&lt;Integer, List&lt;SectionCheckSubOptionResultVo&gt;&gt; subOptionResultMap = subResultPojos.stream()</span><br><span class="line">        .collect(</span><br><span class="line">                Collectors.groupingBy(SectionCheckSubOptionResultVo::getSectionCheckOptionResultId,</span><br><span class="line">                        HashMap::<span class="keyword">new</span>,</span><br><span class="line">                        Collectors.collectingAndThen(</span><br><span class="line">                                Collectors.toList(),</span><br><span class="line">                                list -&gt; &#123;</span><br><span class="line">                                    list.sort(Comparator.comparing(SectionCheckSubOptionResultVo::getPointCode));</span><br><span class="line">                                    <span class="keyword">return</span> list;</span><br><span class="line">                                &#125;</span><br><span class="line">                        )</span><br><span class="line">                )</span><br><span class="line">        );</span><br></pre></td></tr></table></figure>
+
+<p>在Map中通过ID（第一项）取数据</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;SectionCheckSubOptionResultVo&gt; resultVos = subOptionResultMap.get(sectionCheckOptionResultVo.getId());</span><br></pre></td></tr></table></figure>
+
+<h3 id="Entity转Vo"><a href="#Entity转Vo" class="headerlink" title="Entity转Vo"></a>Entity转Vo</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">List&lt;AttachmentVO&gt; collect = list.stream().map(entity -&gt;</span><br><span class="line">&#123;</span><br><span class="line">    AttachmentVO attachmentVO = new AttachmentVO();</span><br><span class="line">    attachmentVO.setId(entity.getId());</span><br><span class="line">    attachmentVO.setName(entity.getName());</span><br><span class="line">    return attachmentVO;</span><br><span class="line">&#125;).collect(Collectors.toList());</span><br></pre></td></tr></table></figure>
+
+<h3 id="JavaBean继承父类后"><a href="#JavaBean继承父类后" class="headerlink" title="JavaBean继承父类后"></a>JavaBean继承父类后</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@EqualsAndHashCode(callSuper = true)</span></span><br></pre></td></tr></table></figure>
+
+<p>装载父类</p>
+<h2 id="Optional用法"><a href="#Optional用法" class="headerlink" title="Optional用法"></a>Optional用法</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">whenEmptyValue_thenReturnDefault</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">User</span> <span class="variable">user</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="type">User</span> <span class="variable">user2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">User</span>(<span class="string">&quot;anna@gmail.com&quot;</span>, <span class="string">&quot;1234&quot;</span>);</span><br><span class="line">    <span class="type">User</span> <span class="variable">result</span> <span class="operator">=</span> Optional.ofNullable(user).orElse(user2);</span><br><span class="line">    <span class="comment">//为空使用默认值User2</span></span><br><span class="line">    assertEquals(user2.getEmail(), result.getEmail());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Test(expected = IllegalArgumentException.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">whenThrowException_thenOk</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">User</span> <span class="variable">result</span> <span class="operator">=</span> Optional.ofNullable(user)</span><br><span class="line">      .orElseThrow( () -&gt; <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>());</span><br><span class="line">&#125;</span><br><span class="line">为空抛出异常</span><br></pre></td></tr></table></figure>
+
+<h2 id="文件上传下载-cn-hutool-core-io包"><a href="#文件上传下载-cn-hutool-core-io包" class="headerlink" title="文件上传下载 cn.hutool.core.io包"></a>文件上传下载 cn.hutool.core.io包</h2><h3 id="文件上传"><a href="#文件上传" class="headerlink" title="文件上传"></a>文件上传</h3><p>文件上传：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">@ApiOperation(value = &quot;上传附件&quot;)</span><br><span class="line">   @PostMapping(&#123;&quot;/upload&quot;&#125;)</span><br><span class="line">   public Result&lt;Boolean&gt; uploadFile(Integer sectiontCheckSubOptionId, MultipartFile uploadFile) &#123;</span><br><span class="line">       // 上传附件接口</span><br><span class="line">       if (null == uploadFile) &#123;</span><br><span class="line">           return Result.error(&quot;文件为空&quot;);</span><br><span class="line">       &#125;</span><br><span class="line">       return Result.ok(fileService.updateFile(sectiontCheckSubOptionId, uploadFile));</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>存进数据库+写进本地：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">updateFile</span><span class="params">(Integer sectiontCheckSubOptionId, MultipartFile file)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">path</span> <span class="operator">=</span> buildPath(sectiontCheckSubOptionId.toString());</span><br><span class="line">    <span class="type">String</span> <span class="variable">allPath</span> <span class="operator">=</span> path  + <span class="string">&quot;/&quot;</span> + file.getOriginalFilename();</span><br><span class="line">    FileUtil.mkParentDirs(allPath);</span><br><span class="line">    <span class="keyword">try</span> (<span class="type">FileOutputStream</span> <span class="variable">outputStream</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(allPath))&#123;</span><br><span class="line">        IoUtil.copy(file.getInputStream(), outputStream);</span><br><span class="line">    &#125;</span><br><span class="line">            <span class="comment">//存储进数据库</span></span><br><span class="line">            <span class="type">AttachmentEntity</span> <span class="variable">attachmentEntity</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AttachmentEntity</span>();</span><br><span class="line">            attachmentEntity.setName(file.getOriginalFilename());</span><br><span class="line">            attachmentEntity.setUrl(allPath);</span><br><span class="line">            attachmentEntity.setSectiontCheckSubOptionId(sectiontCheckSubOptionId);</span><br><span class="line">            <span class="comment">//添加时间数据</span></span><br><span class="line">            <span class="type">Date</span> <span class="variable">date</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Date</span>();</span><br><span class="line">            attachmentEntity.setUpdateTime(date);</span><br><span class="line">            attachmentDao.save(attachmentEntity);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>创建本地路径</p>
+<h3 id="文件下载"><a href="#文件下载" class="headerlink" title="文件下载"></a>文件下载</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">    <span class="meta">@ApiOperation(value = &quot;读取附件&quot;)</span></span><br><span class="line">    <span class="meta">@RequestMapping(</span></span><br><span class="line"><span class="meta">            value = &#123;&quot;/downLoadFile&quot;&#125;,</span></span><br><span class="line"><span class="meta">            method = &#123;RequestMethod.GET&#125;</span></span><br><span class="line"><span class="meta">    )</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">DownloadFile</span><span class="params">(Integer id , HttpServletRequest request, HttpServletResponse response )</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">        <span class="comment">//下载附件接口</span></span><br><span class="line">            fileService.findFile(id,request,response);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>w</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public void findFile (Integer id , HttpServletRequest request, HttpServletResponse response) throws Exception &#123;</span><br><span class="line">    AttachmentEntity attachmentEntity = attachmentDao.selectById(id);</span><br><span class="line">    DowloadFileHelper.setResponseFilename(attachmentEntity.getName(), response, request);</span><br><span class="line">    this.returnFileStream(attachmentEntity.getUrl(), response);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>将本地文件写进数据流</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">    private void returnFileStream(String filePath, HttpServletResponse response) throws IOException &#123;</span><br><span class="line">        File file = new File(filePath);</span><br><span class="line">        if (!file.exists()) &#123;</span><br><span class="line">            throw new RuntimeException(&quot;找不到文件: &quot; + filePath);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file))) &#123;</span><br><span class="line">            try (OutputStream outputStream = response.getOutputStream()) &#123;</span><br><span class="line">                IoUtil.copy(inputStream, outputStream);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        response.flushBuffer();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>将FileName添加进头部：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import java.io.UnsupportedEncodingException;</span><br><span class="line">import java.net.URLEncoder;</span><br><span class="line">import java.nio.charset.StandardCharsets;</span><br><span class="line">import javax.servlet.http.HttpServletRequest;</span><br><span class="line">import javax.servlet.http.HttpServletResponse;</span><br><span class="line"></span><br><span class="line">public class DowloadFileHelper &#123;</span><br><span class="line">    public DowloadFileHelper() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void setResponseFilename(String filename, HttpServletResponse response, HttpServletRequest request) throws UnsupportedEncodingException &#123;</span><br><span class="line">        response.setContentType(&quot;application/force-download&quot;);</span><br><span class="line">        String agent = request.getHeader(&quot;User-Agent&quot;).toUpperCase();</span><br><span class="line">        if (!agent.contains(&quot;MSIE&quot;) &amp;&amp; !agent.contains(&quot;TRIDENT&quot;) &amp;&amp; !agent.contains(&quot;EDGE&quot;)) &#123;</span><br><span class="line">            response.addHeader(&quot;Content-Disposition&quot;, String.format(&quot;attachment;fileName=\&quot;%s\&quot;&quot;, new String(filename.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1)));</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            response.addHeader(&quot;Content-Disposition&quot;, String.format(&quot;attachment;fileName=\&quot;%s\&quot;&quot;, URLEncoder.encode(filename, &quot;utf-8&quot;)));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        response.addHeader(&quot;DownloadFileName&quot;, URLEncoder.encode(filename, &quot;utf-8&quot;));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="返回pojo类型数据，方便转换为Vo"><a href="#返回pojo类型数据，方便转换为Vo" class="headerlink" title="返回pojo类型数据，方便转换为Vo"></a>返回pojo类型数据，方便转换为Vo</h2><p>具体方法：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;POJO&gt; List&lt;POJO&gt; <span class="title function_">findPojoBySectionCheckId</span><span class="params">(Integer sectionCheckId, MapFunction&lt;POJO&gt; function)</span></span><br></pre></td></tr></table></figure>
+
+<p>调用：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;SectionCheckOptionResultListVo&gt; resultPojos = sectionCheckOptionResultDao.findPojoBySectionCheckId(sessionCheckId, MapFunctions.plainPojoMapper(SectionCheckOptionResultListVo.class));</span><br></pre></td></tr></table></figure>
+
+<h2 id="poi-tl写入docx文件"><a href="#poi-tl写入docx文件" class="headerlink" title="poi-tl写入docx文件"></a>poi-tl写入docx文件</h2><p>在service 写入数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">commonInspectService.generateNotifyDocument(</span><br><span class="line">        Constants.PibsQssmInspectNotifyDocumentName.INSPECT_NOTIFY_DOCUMENT_NAME,</span><br><span class="line">        Constants.PibsQssmInspectNotifyDocumentName.INSPECT_NOTIFY_FILE_PATH,</span><br><span class="line">        notifyData, request, response);</span><br></pre></td></tr></table></figure>
+
+<p>给出文件名 文件地址 数据 及request response 即可 将一些数据写入docx</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public void generateNotifyDocument(String fileName, String filePath, InspectNotifyData inspectNotifyData, HttpServletRequest request, HttpServletResponse response) throws IOException &#123;</span><br><span class="line">    DowloadFileHelper.setResponseFilename(fileName, response, request);</span><br><span class="line"></span><br><span class="line">    InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(filePath);</span><br><span class="line">    XWPFTemplate template = XWPFTemplate.compile(resourceAsStream).render(inspectNotifyData);</span><br><span class="line">    </span><br><span class="line">    GenerateWordUtil.writeToResponse(response, template);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MYSQL</title>
+    <url>/2021/05/18/MySQL/</url>
+    <content><![CDATA[<h1 id="MySQL"><a href="#MySQL" class="headerlink" title="MySQL"></a>MySQL</h1><h2 id="数据库分类"><a href="#数据库分类" class="headerlink" title="数据库分类"></a>数据库分类</h2><p><strong>关系型数据库（SQL）</strong></p>
+<ul>
+<li>MySQL,Oracle,Sql Server,DB2,SQLite</li>
+<li>通过表和表之间，行和列之间的关系进行数据的存储</li>
+</ul>
+<p><strong>非关系型数据库（NoSQL）Not Only</strong></p>
+<ul>
+<li>Redis，MongDB </li>
+<li>非关系型数据库，对象存储，通过对象自身的属性来决定</li>
+</ul>
+<p><strong>DBMS（数据库管理系统）</strong></p>
+<ul>
+<li>数据库的管理软件 管理数据库</li>
+</ul>
+<p>单行注释：–</p>
+<p>多行注释：</p>
+<p>&#x2F;*</p>
+<p>*&#x2F;</p>
+<h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><p><strong>数值</strong></p>
+<ul>
+<li>tinyint 十分小的数据	1个字节</li>
+<li>smallint 较小的数据    2个字节</li>
+<li>mediumint 中等大小的数据    3个字节</li>
+<li>int 标准的整数    4个字节常    用的int</li>
+<li>bigint 较大的数据    8个字节</li>
+<li>float 浮点数    4个字节</li>
+<li>double 浮点数    8个字节（精度问题！）</li>
+<li>decimal   字符串形式的浮点数金融计算的时候，一般是使用decimal</li>
+</ul>
+<p><strong>字符串</strong></p>
+<ul>
+<li>char  字符串固定大小的   0-255</li>
+<li>varchar  可变字符串   0~65535   常用的变量   String</li>
+<li>tinytext  微型文本   2^8-1</li>
+<li>text  文本串  2^16-1   保存大文本</li>
+</ul>
+<p><strong>时间日期</strong></p>
+<p>java.util.Date</p>
+<ul>
+<li>date   YYYY-MM-DD  日期格式</li>
+<li>time  HH:mm:ss   时间格式</li>
+<li><strong>datetime  YYYY-MM-DD HH:mm:ss 最常用的时间格式</strong></li>
+<li><strong>timestamp  时间戳，1970.1.1到现在的毫秒数！</strong></li>
+<li>year 年份表示</li>
+</ul>
+<p><strong>null</strong></p>
+<ul>
+<li>没有值，未知</li>
+<li>注意，不要使用NULL进行运算，结果为NULL</li>
+</ul>
+<h2 id="数据库的字段属性（重点）"><a href="#数据库的字段属性（重点）" class="headerlink" title="数据库的字段属性（重点）"></a>数据库的字段属性（重点）</h2><p><strong>Unsigned</strong>：</p>
+<ul>
+<li>无符号的整数</li>
+<li>声明了该列不能声明为负数</li>
+</ul>
+<p><strong>zerofill</strong>：</p>
+<ul>
+<li>0填充的</li>
+<li>不足的位数，使用0来填充，int（3），5—005</li>
+</ul>
+<p><strong>自增</strong>：</p>
+<ul>
+<li>通常理解为自增，自动在上一条记录的基础上+1（默认）</li>
+<li>通常用来设计唯一的主键~index，必须是整数类型</li>
+<li>可以自定义设计主键自增的起始值和步长</li>
+</ul>
+<p><strong>非空：NUll not null</strong></p>
+<ul>
+<li>设置not null 不赋值报错</li>
+<li>Null 不填写值 默认null</li>
+</ul>
+<p><strong>默认</strong></p>
+<ul>
+<li>设置默认的值</li>
+<li>sex，默认为男，如果不指定该列的值，则会有默认的值</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="operator">/</span><span class="operator">/</span>创建表</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span>[IF <span class="keyword">NOT</span> <span class="keyword">EXISTS</span>]表名（</span><br><span class="line">	<span class="string">&#x27;字段名&#x27;</span> 列类型[属性] [索引] [注释]，</span><br><span class="line">	<span class="string">&#x27;字段名&#x27;</span> 列类型[属性] [索引] [注释]，</span><br><span class="line">	<span class="string">&#x27;字段名&#x27;</span> 列类型[属性] [索引] [注释]</span><br><span class="line">）[表类型][字符设置][注释]</span><br><span class="line"></span><br><span class="line"><span class="keyword">SHOW</span> <span class="keyword">CREATE</span> DATABASE school  <span class="comment">--查看创建数据库的语句</span></span><br><span class="line"><span class="keyword">SHOW</span> <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> student  <span class="comment">--查看student数据表的定义语句</span></span><br><span class="line"><span class="keyword">DESC</span> student  <span class="comment">--显示表的结构</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="操作数据库"><a href="#操作数据库" class="headerlink" title="操作数据库"></a>操作数据库</h2><h3 id="修改、删除表"><a href="#修改、删除表" class="headerlink" title="修改、删除表"></a>修改、删除表</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">--修改表名ALTER TABLE旧表名RENAME AS新表名</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> teacher RENAME <span class="keyword">AS</span> teacher1</span><br><span class="line"><span class="comment">--增加表的字段ALTER TABLE 表名 ADD 字段名 列属性</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> teacher1 <span class="keyword">ADD</span> age <span class="type">INT</span>（<span class="number">11</span>）</span><br><span class="line"><span class="comment">--修改表的字段（重命名，修改约束！）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">--ALTER TABLE 表名 MODIFY 字段名 列属性[]</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> teacher1 MODIFY age <span class="type">VARCHAR</span>（<span class="number">11</span>）<span class="comment">--修改约束</span></span><br><span class="line"><span class="comment">--ALTER TABLE 表命 CHANGE 旧名字 新名字 列属性[]</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> teacher1 CHANGE age agel <span class="type">INT</span>（<span class="number">1</span>）<span class="comment">--字段重名名</span></span><br><span class="line"></span><br><span class="line"><span class="comment">--删除表的字段</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> teacherl <span class="keyword">DROP</span> agel</span><br><span class="line"></span><br><span class="line"><span class="comment">--删除表</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> IF <span class="keyword">EXISTS</span> teacher</span><br></pre></td></tr></table></figure>
+
+<p>注意点：</p>
+<ul>
+<li>字段名使用 &#96;&#96; 包裹</li>
+<li>注释 – &#x2F;**&#x2F;</li>
+<li>sql关键字大小写不敏感 小写合适</li>
+<li>所有的符号全部用英文</li>
+</ul>
+]]></content>
+      <tags>
+        <tag>Mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>建立博客咯</title>
+    <url>/2022/05/11/helloworld/</url>
+    <content><![CDATA[]]></content>
+      <tags>
+        <tag>helloworld</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java网络编程</title>
+    <url>/2021/04/11/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/</url>
+    <content><![CDATA[<h3 id="获取IP地址"><a href="#获取IP地址" class="headerlink" title="获取IP地址"></a>获取IP地址</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//查询本机地址 </span></span><br><span class="line"><span class="type">InetAddress</span> <span class="variable">inetaddress</span> <span class="operator">=</span> InetAddress.getByName(<span class="string">&quot;127.0.0.1&quot;</span>);</span><br><span class="line"><span class="comment">//查询本机地址</span></span><br><span class="line"><span class="type">InetAddress</span> <span class="variable">inetaddress</span> <span class="operator">=</span> InetAddress.getLocalHost();</span><br><span class="line"><span class="comment">//获取百度IP地址</span></span><br><span class="line"><span class="type">InetAddress</span> <span class="variable">inetaddress</span> <span class="operator">=</span> InetAddress.getByName(<span class="string">&quot;www.baidu.com&quot;</span>); </span><br></pre></td></tr></table></figure>
+
+<h3 id="建立Socket通信-传输文件"><a href="#建立Socket通信-传输文件" class="headerlink" title="建立Socket通信 传输文件"></a>建立Socket通信 传输文件</h3><h4 id="服务端："><a href="#服务端：" class="headerlink" title="服务端："></a>服务端：</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//建立一个带端口的链接地址</span></span><br><span class="line"><span class="type">ServiceSocket</span> <span class="variable">serviceSocket</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ServiceSocket</span>(<span class="number">9999</span>);</span><br><span class="line"><span class="comment">//等待客服端连接</span></span><br><span class="line"><span class="type">Socket</span> <span class="variable">socket</span> <span class="operator">=</span> serverSocket.accept();</span><br><span class="line"><span class="comment">//读取客户端的消息</span></span><br><span class="line"><span class="type">InputStream</span> <span class="variable">is</span>  <span class="operator">=</span> socket.getInputStream();</span><br><span class="line"><span class="comment">//管道流接收</span></span><br><span class="line"><span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line"><span class="type">byte</span>[] buffer = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line"><span class="type">int</span> len;</span><br><span class="line"><span class="keyword">while</span>((len = is.read(buffer))!=-<span class="number">1</span>)&#123;</span><br><span class="line">    baos.write(buffer,<span class="number">0</span>,len);</span><br><span class="line">&#125;</span><br><span class="line">System.out.println(baos.toString)</span><br><span class="line">baos.close();</span><br><span class="line">is.close(); </span><br><span class="line">socket.close();</span><br><span class="line">serverSocket.close();</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="客户端："><a href="#客户端：" class="headerlink" title="客户端："></a>客户端：</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//得到ip、端口</span></span><br><span class="line"><span class="type">InetAddress</span> <span class="variable">serverIP</span> <span class="operator">=</span> Inet.getByName(<span class="string">&quot;127.0.0.1&quot;</span>); </span><br><span class="line"><span class="type">int</span> <span class="variable">port</span> <span class="operator">=</span> <span class="number">9999</span>;</span><br><span class="line"><span class="comment">//创建一个连接</span></span><br><span class="line"><span class="type">Socket</span> <span class="variable">socket</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Socket</span>(serverIP , port);</span><br><span class="line"><span class="comment">//发送消息 IO流</span></span><br><span class="line"><span class="type">OutputStream</span> <span class="variable">os</span> <span class="operator">=</span> socket.getOutputStream();</span><br><span class="line">os.write(<span class="string">&quot;Hello World&quot;</span>.getBytes());</span><br><span class="line">os.close();</span><br><span class="line">socket.close();</span><br></pre></td></tr></table></figure>
+
+<h3 id="UDP"><a href="#UDP" class="headerlink" title="UDP"></a>UDP</h3><h4 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//建立一个Socket</span></span><br><span class="line"><span class="type">DatagramSocket</span> <span class="variable">socket</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DatagramSocket</span>;</span><br><span class="line"><span class="comment">//建立一个包</span></span><br><span class="line"><span class="type">String</span> <span class="variable">mas</span> <span class="operator">=</span> <span class="string">&quot;123&quot;</span>;</span><br><span class="line"><span class="type">InetAddress</span> <span class="variable">localhost</span> <span class="operator">=</span> InetAddress.getByName(<span class="string">&quot;localhost&quot;</span>);</span><br><span class="line"><span class="type">int</span> <span class="variable">port</span> <span class="operator">=</span> <span class="number">9090</span>;</span><br><span class="line"><span class="type">DaragramaPacket</span> <span class="variable">packet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DaragramaPacket</span>(msg.getBytes(),<span class="number">0</span>,msg.length(),localhost , port);</span><br><span class="line"><span class="comment">//发送包</span></span><br><span class="line">socket.send(packet);</span><br><span class="line">socket.close;</span><br></pre></td></tr></table></figure>
+
+<h4 id="服务端"><a href="#服务端" class="headerlink" title="服务端"></a>服务端</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//设置端口</span></span><br><span class="line"><span class="type">DaragramaSocket</span> <span class="variable">socket</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DatagramSocket</span>(<span class="number">9090</span>);</span><br><span class="line"><span class="comment">//接收数据包</span></span><br><span class="line"><span class="type">byte</span>[] buffer = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line"><span class="type">DaragramaPacket</span> <span class="variable">packet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DaragramaPacket</span>(buffer , <span class="number">0</span> , buffer.length);</span><br><span class="line">socket.receive(packet);</span><br><span class="line">socket.close();</span><br></pre></td></tr></table></figure>
+
+<h3 id="下载网上资源文件"><a href="#下载网上资源文件" class="headerlink" title="下载网上资源文件"></a>下载网上资源文件</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//下载地址</span></span><br><span class="line"></span><br><span class="line"><span class="type">URL</span> <span class="variable">url</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">URL</span>(<span class="string">&quot;http://&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//找到这个资源</span></span><br><span class="line"></span><br><span class="line"><span class="type">HttpURLConnection</span> <span class="variable">urlConnection</span> <span class="operator">=</span> (HttpURLConnection) url.openConnection();</span><br><span class="line"></span><br><span class="line"><span class="type">InputStream</span> <span class="variable">inputStream</span> <span class="operator">=</span> urlConnection .getInputStream;</span><br><span class="line"><span class="type">FileOutputStream</span> <span class="variable">fos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">fileOutputStream</span>(<span class="string">&quot;q.jpg&quot;</span>);</span><br><span class="line"><span class="type">byte</span>[] buffer = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line"><span class="type">int</span> len;</span><br><span class="line"><span class="keyword">while</span>((len=inputStream.read(buffer))!=-<span class="number">1</span>)</span><br><span class="line">&#123;</span><br><span class="line">    fos.write(buffer,<span class="number">0</span>,len);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>vue</title>
+    <url>/2021/09/11/vue/</url>
+    <content><![CDATA[<h1 id="vue"><a href="#vue" class="headerlink" title="vue"></a>vue</h1><p>Soc：<br>HTML+CSS+JS：视图：给用户看，刷新后台给的数据</p>
+<p>网络通信：axios</p>
+<p>页面跳转：vue-router</p>
+<p>状态管理：vuex </p>
+<p>Vue-UI：ICE </p>
+<p>虚拟Dom：利用内存；</p>
+<p>计算属性–&gt;Vue特特色</p>
+<p>集大成者：MVVM+Dom</p>
+<p>大前端时代：后端：轻松</p>
+<p>裁员：好事</p>
+]]></content>
+      <tags>
+        <tag>vue</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Spring</title>
     <url>/2021/07/12/Spring/</url>
     <content><![CDATA[<h3 id="Maven配置"><a href="#Maven配置" class="headerlink" title="Maven配置"></a>Maven配置</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!-- https://mvnrepository.com/artifact/org.springframework/spring-webmvc --&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-webmvc&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;5.3.8&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">&lt;!-- https://mvnrepository.com/artifact/org.springframework/spring-webmvc --&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-jdbc&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;5.2.0.RELEASE&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
@@ -70,8 +285,8 @@
 <li>控制反转（IOC），面向切面编程（AOP）</li>
 <li>支持事务的处理，对框架整合的支持</li>
 </ul>
-<h3 id="组成"><a href="#组成" class="headerlink" title="组成"></a>组成</h3><p><img src="/.com//.%5CSpring%5Cimage-20210713193051068.png" alt="image-20210713193051068"></p>
-<h3 id="拓展"><a href="#拓展" class="headerlink" title="拓展"></a>拓展</h3><p><img src="/.com//images%5Cimage-20210713193253523.png" alt="image-20210713193253523"></p>
+<h3 id="组成"><a href="#组成" class="headerlink" title="组成"></a>组成</h3><p><img src="/images/image-20210713193051068.png" alt="image-20210713193051068"></p>
+<h3 id="拓展"><a href="#拓展" class="headerlink" title="拓展"></a>拓展</h3><p><img src="/images/image-20210713193253523.png" alt="image-20210713193253523"></p>
 <ul>
 <li>Spring Boot<ul>
 <li>一个快速开发的脚手架</li>
@@ -235,221 +450,6 @@
 ]]></content>
       <tags>
         <tag>Java, Spring</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>MYSQL</title>
-    <url>/2021/05/18/MySQL/</url>
-    <content><![CDATA[<h1 id="MySQL"><a href="#MySQL" class="headerlink" title="MySQL"></a>MySQL</h1><h2 id="数据库分类"><a href="#数据库分类" class="headerlink" title="数据库分类"></a>数据库分类</h2><p><strong>关系型数据库（SQL）</strong></p>
-<ul>
-<li>MySQL,Oracle,Sql Server,DB2,SQLite</li>
-<li>通过表和表之间，行和列之间的关系进行数据的存储</li>
-</ul>
-<p><strong>非关系型数据库（NoSQL）Not Only</strong></p>
-<ul>
-<li>Redis，MongDB </li>
-<li>非关系型数据库，对象存储，通过对象自身的属性来决定</li>
-</ul>
-<p><strong>DBMS（数据库管理系统）</strong></p>
-<ul>
-<li>数据库的管理软件 管理数据库</li>
-</ul>
-<p>单行注释：–</p>
-<p>多行注释：</p>
-<p>&#x2F;*</p>
-<p>*&#x2F;</p>
-<h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><p><strong>数值</strong></p>
-<ul>
-<li>tinyint 十分小的数据	1个字节</li>
-<li>smallint 较小的数据    2个字节</li>
-<li>mediumint 中等大小的数据    3个字节</li>
-<li>int 标准的整数    4个字节常    用的int</li>
-<li>bigint 较大的数据    8个字节</li>
-<li>float 浮点数    4个字节</li>
-<li>double 浮点数    8个字节（精度问题！）</li>
-<li>decimal   字符串形式的浮点数金融计算的时候，一般是使用decimal</li>
-</ul>
-<p><strong>字符串</strong></p>
-<ul>
-<li>char  字符串固定大小的   0-255</li>
-<li>varchar  可变字符串   0~65535   常用的变量   String</li>
-<li>tinytext  微型文本   2^8-1</li>
-<li>text  文本串  2^16-1   保存大文本</li>
-</ul>
-<p><strong>时间日期</strong></p>
-<p>java.util.Date</p>
-<ul>
-<li>date   YYYY-MM-DD  日期格式</li>
-<li>time  HH:mm:ss   时间格式</li>
-<li><strong>datetime  YYYY-MM-DD HH:mm:ss 最常用的时间格式</strong></li>
-<li><strong>timestamp  时间戳，1970.1.1到现在的毫秒数！</strong></li>
-<li>year 年份表示</li>
-</ul>
-<p><strong>null</strong></p>
-<ul>
-<li>没有值，未知</li>
-<li>注意，不要使用NULL进行运算，结果为NULL</li>
-</ul>
-<h2 id="数据库的字段属性（重点）"><a href="#数据库的字段属性（重点）" class="headerlink" title="数据库的字段属性（重点）"></a>数据库的字段属性（重点）</h2><p><strong>Unsigned</strong>：</p>
-<ul>
-<li>无符号的整数</li>
-<li>声明了该列不能声明为负数</li>
-</ul>
-<p><strong>zerofill</strong>：</p>
-<ul>
-<li>0填充的</li>
-<li>不足的位数，使用0来填充，int（3），5—005</li>
-</ul>
-<p><strong>自增</strong>：</p>
-<ul>
-<li>通常理解为自增，自动在上一条记录的基础上+1（默认）</li>
-<li>通常用来设计唯一的主键~index，必须是整数类型</li>
-<li>可以自定义设计主键自增的起始值和步长</li>
-</ul>
-<p><strong>非空：NUll not null</strong></p>
-<ul>
-<li>设置not null 不赋值报错</li>
-<li>Null 不填写值 默认null</li>
-</ul>
-<p><strong>默认</strong></p>
-<ul>
-<li>设置默认的值</li>
-<li>sex，默认为男，如果不指定该列的值，则会有默认的值</li>
-</ul>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="operator">/</span><span class="operator">/</span>创建表</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span>[IF <span class="keyword">NOT</span> <span class="keyword">EXISTS</span>]表名（</span><br><span class="line">	<span class="string">&#x27;字段名&#x27;</span> 列类型[属性] [索引] [注释]，</span><br><span class="line">	<span class="string">&#x27;字段名&#x27;</span> 列类型[属性] [索引] [注释]，</span><br><span class="line">	<span class="string">&#x27;字段名&#x27;</span> 列类型[属性] [索引] [注释]</span><br><span class="line">）[表类型][字符设置][注释]</span><br><span class="line"></span><br><span class="line"><span class="keyword">SHOW</span> <span class="keyword">CREATE</span> DATABASE school  <span class="comment">--查看创建数据库的语句</span></span><br><span class="line"><span class="keyword">SHOW</span> <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> student  <span class="comment">--查看student数据表的定义语句</span></span><br><span class="line"><span class="keyword">DESC</span> student  <span class="comment">--显示表的结构</span></span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="操作数据库"><a href="#操作数据库" class="headerlink" title="操作数据库"></a>操作数据库</h2><h3 id="修改、删除表"><a href="#修改、删除表" class="headerlink" title="修改、删除表"></a>修改、删除表</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">--修改表名ALTER TABLE旧表名RENAME AS新表名</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> teacher RENAME <span class="keyword">AS</span> teacher1</span><br><span class="line"><span class="comment">--增加表的字段ALTER TABLE 表名 ADD 字段名 列属性</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> teacher1 <span class="keyword">ADD</span> age <span class="type">INT</span>（<span class="number">11</span>）</span><br><span class="line"><span class="comment">--修改表的字段（重命名，修改约束！）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">--ALTER TABLE 表名 MODIFY 字段名 列属性[]</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> teacher1 MODIFY age <span class="type">VARCHAR</span>（<span class="number">11</span>）<span class="comment">--修改约束</span></span><br><span class="line"><span class="comment">--ALTER TABLE 表命 CHANGE 旧名字 新名字 列属性[]</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> teacher1 CHANGE age agel <span class="type">INT</span>（<span class="number">1</span>）<span class="comment">--字段重名名</span></span><br><span class="line"></span><br><span class="line"><span class="comment">--删除表的字段</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> teacherl <span class="keyword">DROP</span> agel</span><br><span class="line"></span><br><span class="line"><span class="comment">--删除表</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> IF <span class="keyword">EXISTS</span> teacher</span><br></pre></td></tr></table></figure>
-
-<p>注意点：</p>
-<ul>
-<li>字段名使用 &#96;&#96; 包裹</li>
-<li>注释 – &#x2F;**&#x2F;</li>
-<li>sql关键字大小写不敏感 小写合适</li>
-<li>所有的符号全部用英文</li>
-</ul>
-]]></content>
-      <tags>
-        <tag>Mysql</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>SpringBoot及Java8特性</title>
-    <url>/2021/07/15/Spring%20Boot%E5%8F%8AJava8%E7%89%B9%E6%80%A7/</url>
-    <content><![CDATA[<h2 id="BigDecimal四舍五入"><a href="#BigDecimal四舍五入" class="headerlink" title="BigDecimal四舍五入"></a>BigDecimal四舍五入</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">divide(<span class="keyword">new</span> <span class="title class_">BigDecimal</span>(<span class="number">1</span>),<span class="number">1</span>,BigDecimal.ROUND_HALF_UP)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (String key : results.keySet())&#123;</span><br><span class="line">          <span class="type">ProcurementCountBudgetStatistic</span> <span class="variable">procurementCountBudgetStatistic</span> <span class="operator">=</span> results.get(key);</span><br><span class="line">          <span class="type">BigDecimal</span> <span class="variable">divide</span> <span class="operator">=</span> procurementCountBudgetStatistic.getBudget().divide(<span class="keyword">new</span> <span class="title class_">BigDecimal</span>(<span class="number">10000</span>), <span class="number">1</span>, BigDecimal.ROUND_HALF_UP);</span><br><span class="line">          procurementCountBudgetStatistic.setBudget(divide);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (ProjectByTypes projectByTypes : serve1) &#123;</span><br><span class="line">    <span class="type">BigDecimal</span> <span class="variable">Budget</span> <span class="operator">=</span> projectByTypes.getAmount();</span><br><span class="line">    Budget.divide(<span class="keyword">new</span> <span class="title class_">BigDecimal</span>(<span class="number">10000</span>),<span class="number">1</span>, BigDecimal.ROUND_HALF_UP);</span><br><span class="line">    projectByTypes.setAmount(Budget.divide(<span class="keyword">new</span> <span class="title class_">BigDecimal</span>(<span class="number">10000</span>),<span class="number">1</span>, BigDecimal.ROUND_HALF_UP));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="Stream流"><a href="#Stream流" class="headerlink" title="Stream流"></a>Stream流</h2><h3 id="将list-转为-Map"><a href="#将list-转为-Map" class="headerlink" title="将list 转为 Map"></a>将list 转为 Map</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Map&lt;Integer,String&gt; userMap1 = userList.stream().collect(Collectors.toMap(User::getId,User::getName))</span><br></pre></td></tr></table></figure>
-
-<p><img src="/.com//images%5C20190627164129336.png" alt="20190627164129336"></p>
-<h3 id="Map装载-排序"><a href="#Map装载-排序" class="headerlink" title="Map装载+排序"></a>Map装载+排序</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">SectionCheckAndCheckItemVo</span> <span class="variable">sectionCheck</span> <span class="operator">=</span> sectionCheckDao.getById(sessionCheckId, MapFunctions.plainPojoMapper(SectionCheckAndCheckItemVo.class));</span><br><span class="line">List&lt;SectionCheckOptionResultListVo&gt; resultPojos = sectionCheckOptionResultDao.findPojoBySectionCheckId(sessionCheckId, MapFunctions.plainPojoMapper(SectionCheckOptionResultListVo.class));</span><br><span class="line">List&lt;SectionCheckSubOptionResultVo&gt; subResultPojos = sectionCheckSubOptionResultDao.findPojoBySectionCheckId(sessionCheckId, MapFunctions.plainPojoMapper(SectionCheckSubOptionResultVo.class));</span><br><span class="line">HashMap&lt;Integer, List&lt;SectionCheckSubOptionResultVo&gt;&gt; subOptionResultMap = subResultPojos.stream()</span><br><span class="line">        .collect(</span><br><span class="line">                Collectors.groupingBy(SectionCheckSubOptionResultVo::getSectionCheckOptionResultId,</span><br><span class="line">                        HashMap::<span class="keyword">new</span>,</span><br><span class="line">                        Collectors.collectingAndThen(</span><br><span class="line">                                Collectors.toList(),</span><br><span class="line">                                list -&gt; &#123;</span><br><span class="line">                                    list.sort(Comparator.comparing(SectionCheckSubOptionResultVo::getPointCode));</span><br><span class="line">                                    <span class="keyword">return</span> list;</span><br><span class="line">                                &#125;</span><br><span class="line">                        )</span><br><span class="line">                )</span><br><span class="line">        );</span><br></pre></td></tr></table></figure>
-
-<p>在Map中通过ID（第一项）取数据</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;SectionCheckSubOptionResultVo&gt; resultVos = subOptionResultMap.get(sectionCheckOptionResultVo.getId());</span><br></pre></td></tr></table></figure>
-
-<h3 id="Entity转Vo"><a href="#Entity转Vo" class="headerlink" title="Entity转Vo"></a>Entity转Vo</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">List&lt;AttachmentVO&gt; collect = list.stream().map(entity -&gt;</span><br><span class="line">&#123;</span><br><span class="line">    AttachmentVO attachmentVO = new AttachmentVO();</span><br><span class="line">    attachmentVO.setId(entity.getId());</span><br><span class="line">    attachmentVO.setName(entity.getName());</span><br><span class="line">    return attachmentVO;</span><br><span class="line">&#125;).collect(Collectors.toList());</span><br></pre></td></tr></table></figure>
-
-<h3 id="JavaBean继承父类后"><a href="#JavaBean继承父类后" class="headerlink" title="JavaBean继承父类后"></a>JavaBean继承父类后</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@EqualsAndHashCode(callSuper = true)</span></span><br></pre></td></tr></table></figure>
-
-<p>装载父类</p>
-<h2 id="Optional用法"><a href="#Optional用法" class="headerlink" title="Optional用法"></a>Optional用法</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">whenEmptyValue_thenReturnDefault</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">User</span> <span class="variable">user</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="type">User</span> <span class="variable">user2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">User</span>(<span class="string">&quot;anna@gmail.com&quot;</span>, <span class="string">&quot;1234&quot;</span>);</span><br><span class="line">    <span class="type">User</span> <span class="variable">result</span> <span class="operator">=</span> Optional.ofNullable(user).orElse(user2);</span><br><span class="line">    <span class="comment">//为空使用默认值User2</span></span><br><span class="line">    assertEquals(user2.getEmail(), result.getEmail());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Test(expected = IllegalArgumentException.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">whenThrowException_thenOk</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">User</span> <span class="variable">result</span> <span class="operator">=</span> Optional.ofNullable(user)</span><br><span class="line">      .orElseThrow( () -&gt; <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>());</span><br><span class="line">&#125;</span><br><span class="line">为空抛出异常</span><br></pre></td></tr></table></figure>
-
-<h2 id="文件上传下载-cn-hutool-core-io包"><a href="#文件上传下载-cn-hutool-core-io包" class="headerlink" title="文件上传下载 cn.hutool.core.io包"></a>文件上传下载 cn.hutool.core.io包</h2><h3 id="文件上传"><a href="#文件上传" class="headerlink" title="文件上传"></a>文件上传</h3><p>文件上传：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">@ApiOperation(value = &quot;上传附件&quot;)</span><br><span class="line">   @PostMapping(&#123;&quot;/upload&quot;&#125;)</span><br><span class="line">   public Result&lt;Boolean&gt; uploadFile(Integer sectiontCheckSubOptionId, MultipartFile uploadFile) &#123;</span><br><span class="line">       // 上传附件接口</span><br><span class="line">       if (null == uploadFile) &#123;</span><br><span class="line">           return Result.error(&quot;文件为空&quot;);</span><br><span class="line">       &#125;</span><br><span class="line">       return Result.ok(fileService.updateFile(sectiontCheckSubOptionId, uploadFile));</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-<p>存进数据库+写进本地：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">updateFile</span><span class="params">(Integer sectiontCheckSubOptionId, MultipartFile file)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">path</span> <span class="operator">=</span> buildPath(sectiontCheckSubOptionId.toString());</span><br><span class="line">    <span class="type">String</span> <span class="variable">allPath</span> <span class="operator">=</span> path  + <span class="string">&quot;/&quot;</span> + file.getOriginalFilename();</span><br><span class="line">    FileUtil.mkParentDirs(allPath);</span><br><span class="line">    <span class="keyword">try</span> (<span class="type">FileOutputStream</span> <span class="variable">outputStream</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(allPath))&#123;</span><br><span class="line">        IoUtil.copy(file.getInputStream(), outputStream);</span><br><span class="line">    &#125;</span><br><span class="line">            <span class="comment">//存储进数据库</span></span><br><span class="line">            <span class="type">AttachmentEntity</span> <span class="variable">attachmentEntity</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AttachmentEntity</span>();</span><br><span class="line">            attachmentEntity.setName(file.getOriginalFilename());</span><br><span class="line">            attachmentEntity.setUrl(allPath);</span><br><span class="line">            attachmentEntity.setSectiontCheckSubOptionId(sectiontCheckSubOptionId);</span><br><span class="line">            <span class="comment">//添加时间数据</span></span><br><span class="line">            <span class="type">Date</span> <span class="variable">date</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Date</span>();</span><br><span class="line">            attachmentEntity.setUpdateTime(date);</span><br><span class="line">            attachmentDao.save(attachmentEntity);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p>创建本地路径</p>
-<h3 id="文件下载"><a href="#文件下载" class="headerlink" title="文件下载"></a>文件下载</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">    <span class="meta">@ApiOperation(value = &quot;读取附件&quot;)</span></span><br><span class="line">    <span class="meta">@RequestMapping(</span></span><br><span class="line"><span class="meta">            value = &#123;&quot;/downLoadFile&quot;&#125;,</span></span><br><span class="line"><span class="meta">            method = &#123;RequestMethod.GET&#125;</span></span><br><span class="line"><span class="meta">    )</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">DownloadFile</span><span class="params">(Integer id , HttpServletRequest request, HttpServletResponse response )</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">        <span class="comment">//下载附件接口</span></span><br><span class="line">            fileService.findFile(id,request,response);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>w</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public void findFile (Integer id , HttpServletRequest request, HttpServletResponse response) throws Exception &#123;</span><br><span class="line">    AttachmentEntity attachmentEntity = attachmentDao.selectById(id);</span><br><span class="line">    DowloadFileHelper.setResponseFilename(attachmentEntity.getName(), response, request);</span><br><span class="line">    this.returnFileStream(attachmentEntity.getUrl(), response);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>将本地文件写进数据流</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">    private void returnFileStream(String filePath, HttpServletResponse response) throws IOException &#123;</span><br><span class="line">        File file = new File(filePath);</span><br><span class="line">        if (!file.exists()) &#123;</span><br><span class="line">            throw new RuntimeException(&quot;找不到文件: &quot; + filePath);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file))) &#123;</span><br><span class="line">            try (OutputStream outputStream = response.getOutputStream()) &#123;</span><br><span class="line">                IoUtil.copy(inputStream, outputStream);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        response.flushBuffer();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>将FileName添加进头部：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import java.io.UnsupportedEncodingException;</span><br><span class="line">import java.net.URLEncoder;</span><br><span class="line">import java.nio.charset.StandardCharsets;</span><br><span class="line">import javax.servlet.http.HttpServletRequest;</span><br><span class="line">import javax.servlet.http.HttpServletResponse;</span><br><span class="line"></span><br><span class="line">public class DowloadFileHelper &#123;</span><br><span class="line">    public DowloadFileHelper() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void setResponseFilename(String filename, HttpServletResponse response, HttpServletRequest request) throws UnsupportedEncodingException &#123;</span><br><span class="line">        response.setContentType(&quot;application/force-download&quot;);</span><br><span class="line">        String agent = request.getHeader(&quot;User-Agent&quot;).toUpperCase();</span><br><span class="line">        if (!agent.contains(&quot;MSIE&quot;) &amp;&amp; !agent.contains(&quot;TRIDENT&quot;) &amp;&amp; !agent.contains(&quot;EDGE&quot;)) &#123;</span><br><span class="line">            response.addHeader(&quot;Content-Disposition&quot;, String.format(&quot;attachment;fileName=\&quot;%s\&quot;&quot;, new String(filename.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1)));</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            response.addHeader(&quot;Content-Disposition&quot;, String.format(&quot;attachment;fileName=\&quot;%s\&quot;&quot;, URLEncoder.encode(filename, &quot;utf-8&quot;)));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        response.addHeader(&quot;DownloadFileName&quot;, URLEncoder.encode(filename, &quot;utf-8&quot;));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="返回pojo类型数据，方便转换为Vo"><a href="#返回pojo类型数据，方便转换为Vo" class="headerlink" title="返回pojo类型数据，方便转换为Vo"></a>返回pojo类型数据，方便转换为Vo</h2><p>具体方法：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;POJO&gt; List&lt;POJO&gt; <span class="title function_">findPojoBySectionCheckId</span><span class="params">(Integer sectionCheckId, MapFunction&lt;POJO&gt; function)</span></span><br></pre></td></tr></table></figure>
-
-<p>调用：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;SectionCheckOptionResultListVo&gt; resultPojos = sectionCheckOptionResultDao.findPojoBySectionCheckId(sessionCheckId, MapFunctions.plainPojoMapper(SectionCheckOptionResultListVo.class));</span><br></pre></td></tr></table></figure>
-
-<h2 id="poi-tl写入docx文件"><a href="#poi-tl写入docx文件" class="headerlink" title="poi-tl写入docx文件"></a>poi-tl写入docx文件</h2><p>在service 写入数据</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">commonInspectService.generateNotifyDocument(</span><br><span class="line">        Constants.PibsQssmInspectNotifyDocumentName.INSPECT_NOTIFY_DOCUMENT_NAME,</span><br><span class="line">        Constants.PibsQssmInspectNotifyDocumentName.INSPECT_NOTIFY_FILE_PATH,</span><br><span class="line">        notifyData, request, response);</span><br></pre></td></tr></table></figure>
-
-<p>给出文件名 文件地址 数据 及request response 即可 将一些数据写入docx</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public void generateNotifyDocument(String fileName, String filePath, InspectNotifyData inspectNotifyData, HttpServletRequest request, HttpServletResponse response) throws IOException &#123;</span><br><span class="line">    DowloadFileHelper.setResponseFilename(fileName, response, request);</span><br><span class="line"></span><br><span class="line">    InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(filePath);</span><br><span class="line">    XWPFTemplate template = XWPFTemplate.compile(resourceAsStream).render(inspectNotifyData);</span><br><span class="line">    </span><br><span class="line">    GenerateWordUtil.writeToResponse(response, template);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>建立博客咯</title>
-    <url>/2022/05/11/helloworld/</url>
-    <content><![CDATA[]]></content>
-      <tags>
-        <tag>helloworld</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>vue</title>
-    <url>/2021/09/11/vue/</url>
-    <content><![CDATA[<h1 id="vue"><a href="#vue" class="headerlink" title="vue"></a>vue</h1><p>Soc：<br>HTML+CSS+JS：视图：给用户看，刷新后台给的数据</p>
-<p>网络通信：axios</p>
-<p>页面跳转：vue-router</p>
-<p>状态管理：vuex </p>
-<p>Vue-UI：ICE </p>
-<p>虚拟Dom：利用内存；</p>
-<p>计算属性–&gt;Vue特特色</p>
-<p>集大成者：MVVM+Dom</p>
-<p>大前端时代：后端：轻松</p>
-<p>裁员：好事</p>
-]]></content>
-      <tags>
-        <tag>vue</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java网络编程</title>
-    <url>/2021/04/11/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/</url>
-    <content><![CDATA[<h3 id="获取IP地址"><a href="#获取IP地址" class="headerlink" title="获取IP地址"></a>获取IP地址</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//查询本机地址 </span></span><br><span class="line"><span class="type">InetAddress</span> <span class="variable">inetaddress</span> <span class="operator">=</span> InetAddress.getByName(<span class="string">&quot;127.0.0.1&quot;</span>);</span><br><span class="line"><span class="comment">//查询本机地址</span></span><br><span class="line"><span class="type">InetAddress</span> <span class="variable">inetaddress</span> <span class="operator">=</span> InetAddress.getLocalHost();</span><br><span class="line"><span class="comment">//获取百度IP地址</span></span><br><span class="line"><span class="type">InetAddress</span> <span class="variable">inetaddress</span> <span class="operator">=</span> InetAddress.getByName(<span class="string">&quot;www.baidu.com&quot;</span>); </span><br></pre></td></tr></table></figure>
-
-<h3 id="建立Socket通信-传输文件"><a href="#建立Socket通信-传输文件" class="headerlink" title="建立Socket通信 传输文件"></a>建立Socket通信 传输文件</h3><h4 id="服务端："><a href="#服务端：" class="headerlink" title="服务端："></a>服务端：</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//建立一个带端口的链接地址</span></span><br><span class="line"><span class="type">ServiceSocket</span> <span class="variable">serviceSocket</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ServiceSocket</span>(<span class="number">9999</span>);</span><br><span class="line"><span class="comment">//等待客服端连接</span></span><br><span class="line"><span class="type">Socket</span> <span class="variable">socket</span> <span class="operator">=</span> serverSocket.accept();</span><br><span class="line"><span class="comment">//读取客户端的消息</span></span><br><span class="line"><span class="type">InputStream</span> <span class="variable">is</span>  <span class="operator">=</span> socket.getInputStream();</span><br><span class="line"><span class="comment">//管道流接收</span></span><br><span class="line"><span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line"><span class="type">byte</span>[] buffer = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line"><span class="type">int</span> len;</span><br><span class="line"><span class="keyword">while</span>((len = is.read(buffer))!=-<span class="number">1</span>)&#123;</span><br><span class="line">    baos.write(buffer,<span class="number">0</span>,len);</span><br><span class="line">&#125;</span><br><span class="line">System.out.println(baos.toString)</span><br><span class="line">baos.close();</span><br><span class="line">is.close(); </span><br><span class="line">socket.close();</span><br><span class="line">serverSocket.close();</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="客户端："><a href="#客户端：" class="headerlink" title="客户端："></a>客户端：</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//得到ip、端口</span></span><br><span class="line"><span class="type">InetAddress</span> <span class="variable">serverIP</span> <span class="operator">=</span> Inet.getByName(<span class="string">&quot;127.0.0.1&quot;</span>); </span><br><span class="line"><span class="type">int</span> <span class="variable">port</span> <span class="operator">=</span> <span class="number">9999</span>;</span><br><span class="line"><span class="comment">//创建一个连接</span></span><br><span class="line"><span class="type">Socket</span> <span class="variable">socket</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Socket</span>(serverIP , port);</span><br><span class="line"><span class="comment">//发送消息 IO流</span></span><br><span class="line"><span class="type">OutputStream</span> <span class="variable">os</span> <span class="operator">=</span> socket.getOutputStream();</span><br><span class="line">os.write(<span class="string">&quot;Hello World&quot;</span>.getBytes());</span><br><span class="line">os.close();</span><br><span class="line">socket.close();</span><br></pre></td></tr></table></figure>
-
-<h3 id="UDP"><a href="#UDP" class="headerlink" title="UDP"></a>UDP</h3><h4 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//建立一个Socket</span></span><br><span class="line"><span class="type">DatagramSocket</span> <span class="variable">socket</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DatagramSocket</span>;</span><br><span class="line"><span class="comment">//建立一个包</span></span><br><span class="line"><span class="type">String</span> <span class="variable">mas</span> <span class="operator">=</span> <span class="string">&quot;123&quot;</span>;</span><br><span class="line"><span class="type">InetAddress</span> <span class="variable">localhost</span> <span class="operator">=</span> InetAddress.getByName(<span class="string">&quot;localhost&quot;</span>);</span><br><span class="line"><span class="type">int</span> <span class="variable">port</span> <span class="operator">=</span> <span class="number">9090</span>;</span><br><span class="line"><span class="type">DaragramaPacket</span> <span class="variable">packet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DaragramaPacket</span>(msg.getBytes(),<span class="number">0</span>,msg.length(),localhost , port);</span><br><span class="line"><span class="comment">//发送包</span></span><br><span class="line">socket.send(packet);</span><br><span class="line">socket.close;</span><br></pre></td></tr></table></figure>
-
-<h4 id="服务端"><a href="#服务端" class="headerlink" title="服务端"></a>服务端</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//设置端口</span></span><br><span class="line"><span class="type">DaragramaSocket</span> <span class="variable">socket</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DatagramSocket</span>(<span class="number">9090</span>);</span><br><span class="line"><span class="comment">//接收数据包</span></span><br><span class="line"><span class="type">byte</span>[] buffer = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line"><span class="type">DaragramaPacket</span> <span class="variable">packet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DaragramaPacket</span>(buffer , <span class="number">0</span> , buffer.length);</span><br><span class="line">socket.receive(packet);</span><br><span class="line">socket.close();</span><br></pre></td></tr></table></figure>
-
-<h3 id="下载网上资源文件"><a href="#下载网上资源文件" class="headerlink" title="下载网上资源文件"></a>下载网上资源文件</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//下载地址</span></span><br><span class="line"></span><br><span class="line"><span class="type">URL</span> <span class="variable">url</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">URL</span>(<span class="string">&quot;http://&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//找到这个资源</span></span><br><span class="line"></span><br><span class="line"><span class="type">HttpURLConnection</span> <span class="variable">urlConnection</span> <span class="operator">=</span> (HttpURLConnection) url.openConnection();</span><br><span class="line"></span><br><span class="line"><span class="type">InputStream</span> <span class="variable">inputStream</span> <span class="operator">=</span> urlConnection .getInputStream;</span><br><span class="line"><span class="type">FileOutputStream</span> <span class="variable">fos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">fileOutputStream</span>(<span class="string">&quot;q.jpg&quot;</span>);</span><br><span class="line"><span class="type">byte</span>[] buffer = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line"><span class="type">int</span> len;</span><br><span class="line"><span class="keyword">while</span>((len=inputStream.read(buffer))!=-<span class="number">1</span>)</span><br><span class="line">&#123;</span><br><span class="line">    fos.write(buffer,<span class="number">0</span>,len);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-]]></content>
-      <tags>
-        <tag>Java</tag>
       </tags>
   </entry>
 </search>
